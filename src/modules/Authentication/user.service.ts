@@ -1,6 +1,7 @@
 
 import config from "../../config/env.config";
 import { pool } from "../../db";
+import type { IJwtPayload } from "../../types/jwtPayload.interface";
 import type { IUser } from "./user.interface";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
@@ -36,7 +37,7 @@ const loginUser = async(payload : { email: string; password: string }) => {
     }
 
     const user = result.rows[0];
-    
+
     const isPasswordValid = bcrypt.compareSync(password, user.password);
 
     if(!isPasswordValid){
@@ -45,7 +46,7 @@ const loginUser = async(payload : { email: string; password: string }) => {
 
     delete user.password;
 
-    const jwtPayload ={
+    const jwtPayload : IJwtPayload={
         id: user.id,
         name: user.name,
         email: user.email,

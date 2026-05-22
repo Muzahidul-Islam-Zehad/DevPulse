@@ -26,14 +26,17 @@ export const db_init = async () => {
             ` 
             CREATE TABLE IF NOT EXISTS issues(
                 id SERIAL,
-                title VARCHAR(150) NOT NULL,
+                title TEXT NOT NULL,
                 description TEXT NOT NULL,
                 type VARCHAR(30) NOT NULL,
                 status VARCHAR(30) DEFAULT 'open',
                 reporter_id INTEGER,
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW(),
-                CHECK(char_length(description) >= 20)
+                CHECK (char_length(description) >= 20),
+                CHECK (char_length(title) <= 150),
+                CHECK (type IN ('bug', 'feature_request')),
+                CHECK (status IN ('open', 'in_progress', 'resolved'))
             )
             `
         )
