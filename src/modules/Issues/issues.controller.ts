@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import commonResponse from "../../utils/commonResponse";
 import { issuesService } from "./issues.service";
 import type { IJwtPayload } from "../../types/jwtPayload.interface";
-import type { IIssues } from "./issues.interface";
+import type { IIssues, QueryType } from "./issues.interface";
 
 const createIssues = async (req: Request, res: Response) => {
     try {
@@ -14,6 +14,19 @@ const createIssues = async (req: Request, res: Response) => {
     }
 }
 
+const getIssues = async (req: Request, res: Response) => {
+    try {
+        const query = req.query as QueryType ;
+
+        const result = await issuesService.getIssuesFromDatabase(query);
+        commonResponse(res, { status: 200, success: true, data: result })
+        
+    } catch (error : any) {
+        commonResponse(res, { status: 400, success: false, message: "Failed to retrieve issues", errors: error.message })
+    }
+}
+
 export const issuesController = {
-    createIssues
+    createIssues,
+    getIssues
 }

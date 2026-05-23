@@ -18,3 +18,31 @@ export const IssuesStatus = {
     resolved: "resolved"
 }
 export type IssuesStatusType = typeof IssuesStatus[keyof typeof IssuesStatus];
+
+
+export type QueryType ={
+    sort: "newest" | "oldest" | undefined;
+    type : IssuesType | undefined;
+    status : IssuesStatusType | undefined;
+}
+
+export const AllowedSortValues = ['newest', 'oldest', undefined] as const;
+export const AllowedTypeValues = [IssuesTypes.bug, IssuesTypes.feature_request, undefined] as const;
+export const AllowedStatusValues = [IssuesStatus.open, IssuesStatus.in_progress, IssuesStatus.resolved, undefined] as const;
+
+export type Reporter = {
+    id: number;
+    name: string;
+    role: string;
+}
+
+export interface IIssuesResponse {
+    id: number;
+    title: string;
+    description: string;
+    type: IssuesType;
+    status: IssuesStatusType;
+    reporter: Reporter;
+    created_at: Date;
+    updated_at: Date;
+}

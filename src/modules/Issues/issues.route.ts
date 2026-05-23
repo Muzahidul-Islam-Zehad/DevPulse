@@ -6,5 +6,6 @@ import { createIssuesMiddleware } from "../../middleware/createissues.middleware
 const router = Router();
 
 router.post('/', createIssuesMiddleware, issuesController.createIssues )
+router.get('/', issuesController.getIssues)
 
 export const issuesRouter = router;

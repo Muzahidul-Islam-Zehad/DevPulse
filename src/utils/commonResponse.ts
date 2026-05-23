@@ -4,7 +4,7 @@ import type { Response } from "express";
 type CommonResponse<T> = {
     status: number;
     success: boolean;
-    message: string;
+    message?: string;
     data?: T;
     errors?: any;
 }

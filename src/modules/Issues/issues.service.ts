@@ -1,13 +1,14 @@
+import { Query } from "pg";
 import { pool } from "../../db";
 import type { IJwtPayload } from "../../types/jwtPayload.interface";
-import {IssuesStatus, IssuesTypes, type IIssues, type IssuesStatusType, type IssuesType } from "./issues.interface";
+import {AllowedSortValues, AllowedStatusValues, AllowedTypeValues, IssuesStatus, IssuesTypes, type IIssues, type IssuesStatusType, type IssuesType, type QueryType } from "./issues.interface";
 
 const createIssuesInDatabase = async (user: IJwtPayload, body: IIssues) => {
 
     const { id } = user;
     const { title, description, type, status } = body;
 
-    if (title.length > 150 || description.length < 20 || type !== IssuesTypes.bug && type !== IssuesTypes.feature_request || (status && status !== IssuesStatus.open && status !== IssuesStatus.in_progress && status !== IssuesStatus.resolved)) {
+     if (title.length > 150 || description.length < 20 || !AllowedTypeValues.includes(type) || (status && !AllowedStatusValues.includes(status))) {
         throw new Error("Invalid input data");
     }
 
@@ -23,8 +24,66 @@ const createIssuesInDatabase = async (user: IJwtPayload, body: IIssues) => {
 
 
 
+const getIssuesFromDatabase = async (query : QueryType) =>{
+
+    if(query.sort && !AllowedSortValues.includes(query.sort) || (query.type && !AllowedTypeValues.includes(query.type)) || (query.status && !AllowedStatusValues.includes(query.status))){
+        throw new Error("Invalid query parameters");
+    }
+
+    if(query.sort === undefined || query.sort.length === 0){
+        query.sort = "newest";
+    }
+
+    const issues = await pool.query(
+        `
+        SELECT * FROM issues
+        `
+    )
+    const repoerterIds = issues.rows.map(issue => issue.reporter_id);
+
+    const reporters = await pool.query(
+        `
+        SELECT * FROM users WHERE id = ANY($1)
+        `, [repoerterIds]
+    )
+
+    const result = issues.rows.map(issue =>{
+        const reporter = reporters.rows.find((reporter) => reporter.id === issue.reporter_id);
+        return {
+            id: issue.id,
+            title: issue.title,
+            description: issue.description,
+            type: issue.type,
+            status: issue.status,
+            reporter: { id: reporter.id, name: reporter.name, role: reporter.role },
+            created_at: issue.created_at,
+            updated_at: issue.updated_at
+        }
+    })
+
+    const finalResult = query.sort === "newest" ? result.sort((a, b) => b.created_at.getTime() - a.created_at.getTime()) : result.sort((a, b) => a.created_at.getTime() - b.created_at.getTime());
+
+    const filteredResult = finalResult.filter(issue => {
+        if(query.type && query.status){
+            return issue.type === query.type && issue.status === query.status;
+        } else if(query.type){
+            return issue.type === query.type;
+        } else if(query.status){
+            return issue.status === query.status;
+        } else {
+            return true;
+        }
+    })
+
+    return filteredResult;
+
+}
+
+
+
 
 
 export const issuesService = {
-    createIssuesInDatabase
+    createIssuesInDatabase,
+    getIssuesFromDatabase
 }
