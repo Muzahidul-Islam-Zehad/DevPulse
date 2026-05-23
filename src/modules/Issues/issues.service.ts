@@ -117,9 +117,24 @@ const getIssuesByIdFromDatabase = async (id : string) =>{
 }
 
 
+const updateIssuesInDatabase = async (id: string, body: IIssues) => {
+    const { title, description, type } = body;
+    if ((title && title.length > 150) || (description && description.length < 20) || (type && !AllowedTypeValues.includes(type))) {
+        throw new Error("Invalid input data");
+    }
+
+    const result = await pool.query(
+        `
+        UPDATE issues SET title = COALESCE($1, title), description = COALESCE($2, description), type = COALESCE($3, type), updated_at = NOW() WHERE id = $4 RETURNING *
+        `, [title, description, type, id]
+    )
+    return result.rows[0];
+}
+
 
 export const issuesService = {
     createIssuesInDatabase,
     getIssuesFromDatabase,
-    getIssuesByIdFromDatabase
+    getIssuesByIdFromDatabase,
+    updateIssuesInDatabase
 }

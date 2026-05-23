@@ -36,8 +36,20 @@ const getIssuesById = async (req: Request, res: Response) => {
     }
 }
 
+const updateIssues = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const result = await issuesService.updateIssuesInDatabase(id as string, req.body as IIssues);
+        commonResponse(res, { status: 200, success: true, message: "Issue updated successfully", data: result })
+        
+    } catch (error : any) {
+        commonResponse(res, { status: 400, success: false, message: "Failed to update issue", errors: error.message })
+    }
+}
+
 export const issuesController = {
     createIssues,
     getIssues,
-    getIssuesById
+    getIssuesById,
+    updateIssues
 }
