@@ -131,10 +131,21 @@ const updateIssuesInDatabase = async (id: string, body: IIssues) => {
     return result.rows[0];
 }
 
+const deleteIssuesFromDatabase = async (id: string) => {
+
+    const result = await pool.query(
+        `
+        DELETE FROM issues WHERE id = $1 RETURNING *
+        `, [id]
+    )
+    return result.rows[0];
+}
+
 
 export const issuesService = {
     createIssuesInDatabase,
     getIssuesFromDatabase,
     getIssuesByIdFromDatabase,
-    updateIssuesInDatabase
+    updateIssuesInDatabase,
+    deleteIssuesFromDatabase
 }

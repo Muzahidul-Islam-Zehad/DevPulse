@@ -5,7 +5,7 @@ import { pool } from "../db";
 import type { IJwtPayload } from "../types/jwtPayload.interface";
 
 
-export const updateIssuesMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteIssuesMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const {id} = req.params;
@@ -43,15 +43,15 @@ export const updateIssuesMiddleware = async (req: Request, res: Response, next: 
         }
 
         if(fetchIssue.rows.length === 0){
-            return commonResponse(res, { status: 404, success: false, message: "Issue not found" })
+            return commonResponse(res, { status: 404, success: false, message: "Issue not found", errors: "No issue found with the provided id" })
         }
 
-        //Maintainer (any issue) OR Contributor (own issue, only if status is open)
-        if(singleUser.role === "maintainer" || (singleUser.role === "contributor" && singleIssue.reporter_id === singleUser.id && singleIssue.status === "open")){
+        //Access: Maintainer only
+        if(singleUser.role === "maintainer"){
             next();
         }
         else{
-            return commonResponse(res, { status: 403, success: false, message: "Forbidden" , errors: "You don't have permission to update this issue"})
+            return commonResponse(res, { status: 403, success: false, message: "Forbidden" , errors: "You don't have permission to delete this issue"})
         }
 
     } catch (error: any) {
