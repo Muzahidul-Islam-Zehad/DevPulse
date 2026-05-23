@@ -22,7 +22,7 @@ A professional issue tracking system API built with Node.js, Express, and Postgr
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/Muzahidul-Islam-Zehad/DevPulse
-   cd assignment-2
+   cd DevPulse
    ```
 2. **Install dependencies**:
    ```bash
